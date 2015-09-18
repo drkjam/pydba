@@ -6,7 +6,7 @@ import subprocess
 
 import psycopg2
 
-from pydbadmin.exc import DatabaseError
+from pydba.exc import DatabaseError
 
 log = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class Postgres(object):
     def __init__(self, host='localhost', port=5432, database='postgres', user=None, password=None,
                  sslmode=None, sslcert=None, sslkey=None, bin_path='/usr/local/bin'):
         self._connect_args = dict(
-            application_name='pydbadmin (psycopg2)',
+            application_name='pydba (psycopg2)',
             database=database, user=user, password=password,
             host=host, port=port,
             sslmode=sslmode, sslcert=sslcert, sslkey=sslkey,

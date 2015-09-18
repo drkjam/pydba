@@ -4,7 +4,7 @@ import uuid
 
 import pytest
 
-from pydbadmin import Postgres
+from pydba import Postgres
 
 
 @pytest.fixture(scope='module')
