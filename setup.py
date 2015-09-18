@@ -75,7 +75,7 @@ Database backup and restore.
 Querying and removing shutting down database connections.
 
     >>> db.connections('postgres')
-    [{'datname': 'postgres', 'state': 'idle', 'pid': 8937, 'psql', 'query': '', 'usename': 'drkjam', ...}]
+    [Connection(datname='postgres', state='idle', pid=13832, query='', usename='drkjam', ...)]
     >>> db.kill_connections('postgres')
     >>> db.connections('postgres')
     []

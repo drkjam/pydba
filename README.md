@@ -2,6 +2,12 @@
 
 A handy Python library for common database admin operations.
 
+[![Latest Version](https://img.shields.io/pypi/v/pydba.svg)](https://pypi.python.org/pypi/pydba)
+
+Requirements
+------------
+[![Versions](https://img.shields.io/pypi/pyversions/pydba.svg)](pypi.python.org/pypi/pydba)
+
 API Usage
 ---------
 
@@ -36,7 +42,7 @@ Database backup and restore.
 Querying and removing shutting down database connections.
 
     >>> db.connections('postgres')
-    [{'datname': 'postgres', 'state': 'idle', 'pid': 8937, 'psql', 'query': '', 'usename': 'drkjam', ...}]
+    [Connection(datname='postgres', pid=13832, state='idle', query='', usename='drkjam', ...)]
     >>> db.kill_connections('postgres')
     >>> db.connections('postgres')
     []
