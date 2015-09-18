@@ -64,24 +64,16 @@ class PostgresDB(object):
         with psycopg2.connect(**self._connect_args) as conn:
             conn.set_session(autocommit=True)
             with conn.cursor() as cur:
-                try:
-                    cur.execute(stmt)
-                except psycopg2.ProgrammingError, e:
-                    log.exception(e)
-                    raise
+                cur.execute(stmt)
         log.info('done')
 
     def _iter_results(self, stmt):
         with psycopg2.connect(**self._connect_args) as conn:
             with conn.cursor() as cur:
-                try:
-                    cur.execute(stmt)
-                    header = [col.name for col in cur.description]
-                    for row in cur:
-                        yield dict(zip(header, row))
-                except psycopg2.ProgrammingError, e:
-                    log.exception(e)
-                    raise
+                cur.execute(stmt)
+                header = [col.name for col in cur.description]
+                for row in cur:
+                    yield dict(zip(header, row))
 
     def _run_cmd(self, cmd, *args):
         cmd_line = [os.path.join(self._bin_path, cmd)] + list(args)
@@ -150,9 +142,8 @@ class PostgresDB(object):
             try:
                 sock.connect((host, port))
                 return True
-            except socket.error, e:
-                log.exception(e)
-            return False
+            except socket.error:
+                return False
 
     def dump(self, name, filename):
         """
