@@ -116,19 +116,19 @@ class PostgresDB(object):
                 log.exception(e)
             return False
 
-    def dump(self, name, outfile):
+    def dump(self, name, filename):
         """Saves the state of the named database to the specified file."""
         if not self.exists(name):
             raise DatabaseError('database %s does not exist!')
-        log.info('dumping %s to %s' % (name, outfile))
+        log.info('dumping %s to %s' % (name, filename))
         self._run_cmd('pg_dump', '--verbose', '--blobs', '--format=custom',
-                      '--file=%s' % outfile, name)
+                      '--file=%s' % filename, name)
 
-    def restore(self, name, infile):
+    def restore(self, name, filename):
         """Loads state into named database from the specified file."""
         if not self.exists(name):
             self.create(name)
         else:
             log.warn('overwriting contents of database %s' % name)
-        log.info('restoring %s from %s' % (name, infile))
-        self._run_cmd('pg_restore', '--verbose', '--dbname=%s' % name, infile)
+        log.info('restoring %s from %s' % (name, filename))
+        self._run_cmd('pg_restore', '--verbose', '--dbname=%s' % name, filename)
