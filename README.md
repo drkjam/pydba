@@ -1,2 +1,2 @@
-# pydbadmin
-Database administration tools for Python
+# pydba
+Tools for DBAs (with deadlines)!

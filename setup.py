@@ -65,7 +65,7 @@ setup(
     ],
     cmdclass={'test': PyTest},
 
-    description='Python tools for DBAs (with deadlines)',
+    description='Tools for DBAs (with deadlines)!',
     download_url='https://pypi.python.org/pypi/pydba/',
     keywords=[
         'Software Development',
