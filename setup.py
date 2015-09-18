@@ -38,7 +38,7 @@ setup(
     cmdclass={'test': PyTest},
     tests_require=['pytest'],
     install_requires=install_requires,
-    description='A handy Python library for common database admin operations.',
+    description='Python tools for DBAs with deadlines!',
     long_description="""`pydba` - a handy Python library for common database admin operations.
 
 API Usage
