@@ -1,8 +1,10 @@
+"""Support for PostgreSQL database interactions."""
 import os
 import socket
 import logging
 import subprocess
 from contextlib import closing
+from collections import namedtuple
 
 import psycopg2
 
@@ -12,9 +14,44 @@ log = logging.getLogger(__name__)
 
 
 class PostgresDB(object):
-    """An API for performing various database administration tasks on a PostgresDB server."""
+    """
+    An API for performing various database administration tasks on a PostgresDB server.
+    """
+    _conn_fields = [
+        'datname', 'datid', 'pid', 'state', 'application_name', 'query', 'usename',
+        'waiting', 'client_hostname', 'client_addr', 'client_port'
+    ]
+
+    Connection = namedtuple('Connection', _conn_fields)
+
     def __init__(self, host='localhost', port=5432, database='postgres', user=None, password=None,
                  sslmode=None, sslcert=None, sslkey=None, bin_path='/usr/local/bin'):
+        """
+        Constructor.
+
+        All arguments are optional and sensible defaults. Override using args depending on your needs.
+
+        Parameters
+        ----------
+        host: str, optional
+            remote server IP address or hostname
+        port: int, optional
+            remote server port
+        database: str, optional
+            name of database to connect to
+        user: str
+            name of user (with required admin privileges)
+        password:
+            password for user
+        sslmode: str, optional
+            mode for SSL connection
+        sslcert: str, optional
+            file path to SSL certificate for connection
+        sslkey: str, optional
+            file path to SSL key for connection
+        bin_path: str, optional
+            path to dir containing client binaries
+        """
         self._connect_args = dict(
             application_name='pydba (psycopg2)',
             database=database, user=user, password=password,
@@ -31,6 +68,7 @@ class PostgresDB(object):
                     cur.execute(stmt)
                 except psycopg2.ProgrammingError, e:
                     log.exception(e)
+                    raise
         log.info('done')
 
     def _iter_results(self, stmt):
@@ -43,6 +81,7 @@ class PostgresDB(object):
                         yield dict(zip(header, row))
                 except psycopg2.ProgrammingError, e:
                     log.exception(e)
+                    raise
 
     def _run_cmd(self, cmd, *args):
         cmd_line = [os.path.join(self._bin_path, cmd)] + list(args)
@@ -89,12 +128,10 @@ class PostgresDB(object):
     def connections(self, name):
         """Returns a list of existing connections to the named database."""
         stmt = """
-            select datname, datid, pid, state, application_name, query, usename, waiting,
-            client_hostname, client_addr, client_port
-            from pg_stat_activity
-            where datname = %r and pid <> pg_backend_pid()
-        """ % name
-        return list(self._iter_results(stmt))
+            select {fields} from pg_stat_activity
+            where datname = {datname!r} and pid <> pg_backend_pid()
+        """.format(fields=', '.join(self._conn_fields), datname=name)
+        return list(self.Connection(**x) for x in self._iter_results(stmt))
 
     def kill_connections(self, name):
         """Drops all connections to the specified database."""
@@ -118,7 +155,16 @@ class PostgresDB(object):
             return False
 
     def dump(self, name, filename):
-        """Saves the state of the named database to the specified file."""
+        """
+        Saves the state of a database to a file.
+
+        Parameters
+        ----------
+        name: str
+            the database to be backed up.
+        filename: str
+            path to a file where database backup will be written.
+        """
         if not self.exists(name):
             raise DatabaseError('database %s does not exist!')
         log.info('dumping %s to %s' % (name, filename))
@@ -126,7 +172,20 @@ class PostgresDB(object):
                       '--file=%s' % filename, name)
 
     def restore(self, name, filename):
-        """Loads state into named database from the specified file."""
+        """
+        Loads state of a backup file to a database.
+
+        Note
+        ----
+        If database name does not exist, it will be created.
+
+        Parameters
+        ----------
+        name: str
+            the database to which backup will be restored.
+        filename: str
+            path to a file contain a postgres database backup.
+        """
         if not self.exists(name):
             self.create(name)
         else:
