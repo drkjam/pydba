@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages, Command
+import pydba
 
 
 class PyTest(Command):
@@ -26,12 +27,25 @@ class PyTest(Command):
 
 setup(
     name="pydba",
-    version="1.0.0",
+    version=pydba.__version__,
     packages=find_packages(),
-
     author='David P. D. Moss',
     author_email='drkjam@gmail.com',
-
+    url='https://github.com/drkjam/pydba/',
+    download_url='https://pypi.python.org/pypi/pydba/',
+    description='Tools for DBAs (with deadlines)!',
+    long_description='',
+    license='MIT License',
+    platforms='POSIX',
+    cmdclass={'test': PyTest},
+    keywords=[
+        'Software Development',
+        'Database Administration',
+        'Systems Administration',
+        'DBA',
+        'PostgreSQL',
+        'SQL',
+    ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
@@ -63,20 +77,4 @@ setup(
         'Topic :: System :: System Shells',
         'Topic :: Utilities',
     ],
-    cmdclass={'test': PyTest},
-
-    description='Tools for DBAs (with deadlines)!',
-    download_url='https://pypi.python.org/pypi/pydba/',
-    keywords=[
-        'Software Development',
-        'Database Administration',
-        'Systems Administration',
-        'DBA',
-        'PostgreSQL',
-        'SQL',
-    ],
-    license='MIT License',
-    long_description='',
-    platforms='POSIX',
-    url='',
 )
