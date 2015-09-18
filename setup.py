@@ -1,38 +1,43 @@
-from setuptools import setup, find_packages, Command
-import pydba
+import sys
+
+from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 
 
-class PyTest(Command):
-    user_options = []
+class PyTest(TestCommand):
+    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
 
     def initialize_options(self):
-        pass
+        TestCommand.initialize_options(self)
+        self.pytest_args = []
 
     def finalize_options(self):
-        pass
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
 
-    def run(self):
-        import os
-        import sys
-        import subprocess
+    def run_tests(self):
+        import pytest
+        errno = pytest.main(self.pytest_args)
+        sys.exit(errno)
 
-        saved_cwd = os.getcwd()
-        try:
-            os.chdir(os.path.join(os.path.dirname(__file__), 'tests'))
-            errno = subprocess.call([sys.executable, '__init__.py'])
-        finally:
-            os.chdir(saved_cwd)
-        raise SystemExit(errno)
 
+with open('requirements.txt') as fp:
+    install_requires = map(lambda x: x.strip(), fp.readlines())
 
 setup(
     name="pydba",
-    version=pydba.__version__,
-    packages=find_packages(),
+    version='1.0.0',
     author='David P. D. Moss',
     author_email='drkjam@gmail.com',
     url='https://github.com/drkjam/pydba/',
     download_url='https://pypi.python.org/pypi/pydba/',
+    license='MIT License',
+    platforms='POSIX',
+    packages=find_packages(),
+    cmdclass={'test': PyTest},
+    tests_require=['pytest'],
+    install_requires=install_requires,
     description='Tools for DBAs (with deadlines)!',
     long_description="""`pydba` is provides a handy API to common database admin operations from Python.
 
@@ -75,9 +80,6 @@ Querying and removing shutting down database connections.
     >>> db.connections('postgres')
     []
 """,
-    license='MIT License',
-    platforms='POSIX',
-    cmdclass={'test': PyTest},
     keywords=[
         'Software Development',
         'Database Administration',
