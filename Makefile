@@ -36,4 +36,4 @@ push_tags:
 
 test: clean
 	@echo 'running tests'
-	py.test -s -x tests/
+	python setup.py test
