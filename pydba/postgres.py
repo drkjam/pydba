@@ -87,13 +87,14 @@ class PostgresDB(object):
         self._run_stmt('alter database %s rename to %s' % (from_name, to_name))
 
     def connections(self, name):
-        """Iterates of the list of existing connections to the named database."""
+        """Returns a list of existing connections to the named database."""
         stmt = """
-            select *
+            select datname, datid, pid, state, application_name, query, usename, waiting,
+            client_hostname, client_addr, client_port
             from pg_stat_activity
             where datname = %r and pid <> pg_backend_pid()
         """ % name
-        return self._iter_results(stmt)
+        return list(self._iter_results(stmt))
 
     def kill_connections(self, name):
         """Drops all connections to the specified database."""

@@ -72,7 +72,7 @@ def test_postgres_create_rename_and_drop(pg):
 
 def test_postgres_list_connections(pg):
     pg.kill_connections('postgres')
-    assert list(pg.connections('postgres')) == []
+    assert pg.connections('postgres') == []
 
 
 def test_backup_and_restore(pg):
