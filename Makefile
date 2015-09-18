@@ -20,11 +20,11 @@ clean:
 
 dist: clean
 	@echo 'building pydba release'
-	python setup_egg.py develop
+	python setup.py develop
 	python setup.py sdist --formats=gztar,zip
 	pip install --upgrade pip
 	pip install wheel
-	python setup_egg.py bdist_wheel --universal
+	python setup.py bdist_wheel --universal
 
 register:
 	@echo 'releasing pydba'
@@ -36,4 +36,4 @@ push_tags:
 
 test: clean
 	@echo 'running tests'
-	py.test -s -x -v --tb=plain
+	py.test -s -x tests/
