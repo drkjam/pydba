@@ -1,0 +1,21 @@
+--------------
+Release: 1.1.0
+--------------
+Date: 20 Sep 2015
+
+^^^^^^^^^^^^^^^^^^^
+Changes since 1.0.0
+^^^^^^^^^^^^^^^^^^^
+
+* PostgresDB.connections() now returns namedtuples.
+
+* Exceptions are no longer obscured by log statements.
+
+* Fixed Python 3.x compatibility issue.
+
+--------------
+Release: 1.0.0
+--------------
+Date: 19 Sep 2015
+
+* First release with support for PostgreSQL.
