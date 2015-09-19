@@ -1,3 +1,4 @@
+import re
 import sys
 
 from setuptools import setup, find_packages
@@ -22,11 +23,15 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
+def _covert_markdown_badge(x, re_match_markdown=re.compile(r'^\[!\[[^]]+\]\(([^)]+)\)\]\((.+)\)$')):
+    return re_match_markdown.sub(r'.. image:: \1\n  :target: \2', x)
+
+#   Load external metadata.
 with open('requirements.txt') as fp:
     install_requires = map(lambda x: x.strip(), fp.readlines())
 
-with open('docs/source/intro.rst') as fp:
-    long_description = fp.read()
+with open('docs/source/intro.md') as fp:
+    long_description = ''.join(map(_covert_markdown_badge, fp))
 
 setup(
     name="pydba",

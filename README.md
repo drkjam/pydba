@@ -1,4 +1,5 @@
-# pydba
+pydba
+=====
 
 A handy Python library for common database admin operations.
 
@@ -8,8 +9,8 @@ Requirements
 ------------
 [![Versions](https://img.shields.io/pypi/pyversions/pydba.svg)](pypi.python.org/pypi/pydba)
 
-API Usage
----------
+Features
+--------
 
 Basic imports and class constructor usage.
 

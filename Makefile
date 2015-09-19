@@ -34,16 +34,11 @@ test: clean
 
 doc:
 	@echo 'building docs'
-	cp docs/source/intro.rst README.md
-
-register:
-	@echo 'registering pydba'
-	python setup.py register
+	cp docs/source/intro.md README.md
 
 dist: release_deps doc
 	@echo 'building pydba distributions'
-	python setup.py register
-	python setup.py develop register sdist --formats=gztar,zip bdist_wheel --universal
+	python setup.py develop sdist --formats=gztar,zip bdist_wheel --universal
 
 release: clean doc release_deps
 	@echo 'release pydba'
