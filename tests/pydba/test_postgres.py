@@ -1,33 +1,14 @@
-from contextlib import contextmanager
 import tempfile
-import uuid
 
 import pytest
 
 from pydba import PostgresDB
+from pydba.utils import temp_name, temp_db
 
 
 @pytest.fixture(scope='module')
 def pg():
     return PostgresDB()
-
-
-def _temp_db_name():
-    #   Generate a globally unique database name.
-    return 'db' + str(uuid.uuid4()).replace('-', '')
-
-
-@contextmanager
-def _transient_db(db):
-    name = _temp_db_name()
-    assert not db.exists(name)
-    db.create(name)
-    assert db.exists(name)
-    try:
-        yield name
-    finally:
-        db.drop(name)
-        assert not db.exists(name)
 
 
 def test_postgres_available(pg):
@@ -49,8 +30,8 @@ def test_postgres_db_exists(pg):
 
 
 def test_postgres_create_rename_and_drop(pg):
-    name1 = _temp_db_name()
-    name2 = _temp_db_name()
+    name1 = temp_name()
+    name2 = temp_name()
 
     assert not pg.exists(name1)
     assert not pg.exists(name2)
@@ -76,7 +57,7 @@ def test_postgres_list_connections(pg):
 
 
 def test_backup_and_restore(pg):
-    with _transient_db(pg) as db_name:
+    with temp_db(pg) as db_name:
         fp = tempfile.NamedTemporaryFile()
         pg.dump(db_name, fp.name)
 
