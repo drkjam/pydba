@@ -3,7 +3,6 @@ import os
 import socket
 import logging
 import subprocess
-from contextlib import closing
 from collections import namedtuple
 
 import psycopg2
@@ -137,16 +136,17 @@ class PostgresDB(object):
           where datname = %r and pid <> pg_backend_pid()
         """ % name)
 
-    def available(self):
+    def available(self, timeout=5):
         """Returns True if database server is running, False otherwise."""
         host = self._connect_args['host']
         port = self._connect_args['port']
-        with closing(socket.socket()) as sock:
-            try:
-                sock.connect((host, port))
-                return True
-            except socket.error:
-                return False
+        try:
+            sock = socket.create_connection((host, port), timeout=timeout)
+            sock.close()
+            return True
+        except socket.error:
+            pass
+        return False
 
     def dump(self, name, filename):
         """

@@ -36,7 +36,7 @@ def test_postgres_available(pg):
 
 def test_postgres_is_not_available():
     db = PostgresDB(host='pydbadmin_fake_hostname')
-    assert not db.available()
+    assert not db.available(timeout=0.25)
 
 
 def test_postgres_db_names(pg):
