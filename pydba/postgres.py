@@ -1,10 +1,12 @@
 """Support for PostgreSQL database interactions."""
+import getpass
 import os
 import socket
 import logging
 import subprocess
 from collections import namedtuple
 
+import pexpect
 import psycopg2
 
 from pydba.exc import DatabaseError
@@ -54,6 +56,9 @@ class PostgresDB(object):
         application_name: str, optional
             allow user to specify the app name in the connection
         """
+        if user is None:
+            user = getpass.getuser()
+
         self._connect_args = dict(
             application_name=application_name,
             database=database, user=user, password=password,
@@ -186,3 +191,34 @@ class PostgresDB(object):
             log.warn('overwriting contents of database %s' % name)
         log.info('restoring %s from %s' % (name, filename))
         self._run_cmd('pg_restore', '--verbose', '--dbname=%s' % name, filename)
+
+    def shell(self, expect=pexpect):
+        """
+        Connects the database client shell to the database.
+
+        Parameters
+        ----------
+        expect_module: str
+            the database to which backup will be restored.
+        """
+        options = [
+            ('dbname', self._connect_args['database']),
+            ('user', self._connect_args['user']),
+            ('host', self._connect_args['host']),
+            ('port', self._connect_args['port']),
+        ]
+
+        if self._connect_args['sslmode'] is not None:
+            options = options + [
+                ('sslmode', self._connect_args['sslmode']),
+                ('sslcert', os.path.expanduser(self._connect_args['sslcert'])),
+                ('sslkey', os.path.expanduser(self._connect_args['sslkey'])),
+            ]
+
+        dsn = ' '.join("%s=%s" % (param, value) for param, value in options)
+
+        child = expect.spawn('psql "%s"' % dsn)
+        if self._connect_args['password'] is not None:
+            child.expect('Password: ')
+            child.sendline(self._connect_args['password'])
+        child.interact()

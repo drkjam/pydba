@@ -1,3 +1,4 @@
+import getpass
 import tempfile
 
 import pytest
@@ -67,3 +68,52 @@ def test_backup_and_restore(pg):
         fp.seek(0)
         pg.restore(db_name, fp.name)
         assert pg.exists(db_name)
+
+
+class FakeChild(object):
+    def __init__(self, cmd):
+        self.cmd = cmd
+        self.password = None
+
+    def expect(self, data):
+        pass
+
+    def sendline(self, line):
+        self.password = line
+
+    def interact(self):
+        pass
+
+
+class ExpectModule(object):
+    def __init__(self):
+        self.expect = None
+
+    def spawn(self, cmd):
+        self.expect = FakeChild(cmd)
+        return self.expect
+
+
+def test_shell(pg):
+    fake_expect = ExpectModule()
+
+    pg.shell(fake_expect)
+
+    assert fake_expect.expect.cmd == 'psql ' \
+        '"dbname=postgres user=' + getpass.getuser() + ' host=localhost port=5432"'
+
+
+def test_shell_with_ssl_and_password_prompt():
+    fake_expect = ExpectModule()
+
+    the_password = 'password1234'
+
+    pg = PostgresDB(user='foo', password=the_password,
+                    sslmode='require', sslcert='test.pem', sslkey='test.key')
+    pg.shell(fake_expect)
+
+    assert fake_expect.expect.password == the_password
+
+    assert fake_expect.expect.cmd == 'psql ' \
+        '"dbname=postgres user=foo host=localhost port=5432 ' \
+        'sslmode=require sslcert=test.pem sslkey=test.key"'
