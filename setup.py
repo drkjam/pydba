@@ -44,7 +44,7 @@ setup(
     platforms='POSIX',
     packages=find_packages(),
     cmdclass={'test': PyTest},
-    tests_require=['pytest'],
+    tests_require=['pytest>=2.8'],
     install_requires=install_requires,
     description='Python tools for DBAs with deadlines!',
     long_description=long_description,
