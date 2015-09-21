@@ -25,7 +25,8 @@ class PostgresDB(object):
     Connection = namedtuple('Connection', _conn_fields)
 
     def __init__(self, host='localhost', port=5432, database='postgres', user=None, password=None,
-                 sslmode=None, sslcert=None, sslkey=None, bin_path='/usr/local/bin'):
+                 sslmode=None, sslcert=None, sslkey=None, bin_path='/usr/local/bin',
+                 application_name='pydba (psycopg2)'):
         """
         Constructor.
 
@@ -51,9 +52,11 @@ class PostgresDB(object):
             file path to SSL key for connection
         bin_path: str, optional
             path to dir containing client binaries
+        application_name: str, optional
+            allow user to specify the app name in the connection
         """
         self._connect_args = dict(
-            application_name='pydba (psycopg2)',
+            application_name=application_name,
             database=database, user=user, password=password,
             host=host, port=port,
             sslmode=sslmode, sslcert=sslcert, sslkey=sslkey,
