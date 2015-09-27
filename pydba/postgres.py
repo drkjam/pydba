@@ -44,8 +44,7 @@ class PostgresDB(object):
     }
 
     def __init__(self, host='localhost', port=5432, database='postgres', user=None, password=None,
-                 sslmode=None, sslcert=None, sslkey=None, bin_path='/usr/local/bin',
-                 application_name='pydba (psycopg2)'):
+                 sslmode=None, sslcert=None, sslkey=None, application_name='pydba (psycopg2)'):
         """
         Constructor.
 
@@ -69,8 +68,6 @@ class PostgresDB(object):
             file path to SSL certificate for connection
         sslkey: str, optional
             file path to SSL key for connection
-        bin_path: str, optional
-            path to dir containing client binaries
         application_name: str, optional
             allow user to specify the app name in the connection
         """
@@ -83,7 +80,8 @@ class PostgresDB(object):
             host=host, port=port,
             sslmode=sslmode, sslcert=sslcert, sslkey=sslkey,
         )
-        self._bin_path = bin_path
+
+        self._bin_paths = {}
 
     def _run_stmt(self, stmt):
         with psycopg2.connect(**self._connect_args) as conn:
@@ -100,8 +98,14 @@ class PostgresDB(object):
                 for row in cur:
                     yield dict(zip(header, row))
 
+    def _path_for(self, cmd):
+        if cmd in self._bin_paths:
+            return self._bin_paths[cmd]
+        else:
+            self._bin_paths[cmd] = pexpect.which(cmd)
+
     def _run_cmd(self, cmd, *args):
-        cmd_line = [os.path.join(self._bin_path, cmd)] + list(args)
+        cmd_line = [self._path_for(cmd)] + list(args)
         log.info('running: %r' % cmd_line)
         proc = subprocess.Popen(cmd_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
