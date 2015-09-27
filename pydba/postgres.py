@@ -14,17 +14,27 @@ from pydba.exc import DatabaseError
 log = logging.getLogger(__name__)
 
 
+CONNECTION_FIELDS = [
+    'datname', 'datid', 'pid', 'state', 'application_name', 'query',
+    'usename', 'waiting', 'client_hostname', 'client_addr', 'client_port'
+]
+
+Connection = namedtuple('Connection', CONNECTION_FIELDS)
+
+
+SETTINGS_FIELDS = [
+    'name', 'setting', 'unit', 'category', 'short_desc', 'extra_desc',
+    'context', 'vartype', 'source', 'min_val', 'max_val', 'enumvals',
+    'boot_val', 'reset_val', 'sourcefile', 'sourceline'
+]
+
+Settings = namedtuple('Settings', SETTINGS_FIELDS)
+
+
 class PostgresDB(object):
     """
     An API for performing various database administration tasks on a PostgresDB server.
     """
-    _conn_fields = [
-        'datname', 'datid', 'pid', 'state', 'application_name', 'query', 'usename',
-        'waiting', 'client_hostname', 'client_addr', 'client_port'
-    ]
-
-    Connection = namedtuple('Connection', _conn_fields)
-
     def __init__(self, host='localhost', port=5432, database='postgres', user=None, password=None,
                  sslmode=None, sslcert=None, sslkey=None, bin_path='/usr/local/bin',
                  application_name='pydba (psycopg2)'):
@@ -129,8 +139,8 @@ class PostgresDB(object):
         stmt = """
             select {fields} from pg_stat_activity
             where datname = {datname!r} and pid <> pg_backend_pid()
-        """.format(fields=', '.join(self._conn_fields), datname=name)
-        return list(self.Connection(**x) for x in self._iter_results(stmt))
+        """.format(fields=', '.join(CONNECTION_FIELDS), datname=name)
+        return list(Connection(**x) for x in self._iter_results(stmt))
 
     def kill_connections(self, name):
         """Drops all connections to the specified database."""
@@ -222,3 +232,8 @@ class PostgresDB(object):
             child.expect('Password: ')
             child.sendline(self._connect_args['password'])
         child.interact()
+
+    def settings(self):
+        """Returns a list of existing settings from the server."""
+        stmt = "select {fields} from pg_settings".format(fields=', '.join(SETTINGS_FIELDS))
+        return list(Settings(**x) for x in self._iter_results(stmt))
