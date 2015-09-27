@@ -35,7 +35,7 @@ with open('docs/source/intro.md') as fp:
 
 setup(
     name="pydba",
-    version='1.1.0',
+    version='1.2.0',
     author='David P. D. Moss',
     author_email='drkjam@gmail.com',
     url='https://github.com/drkjam/pydba/',

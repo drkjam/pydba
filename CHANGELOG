@@ -1,4 +1,25 @@
 --------------
+Release: 1.2.0
+--------------
+Date: 27 Sep 2015
+
+^^^^^^^^^^^^^^^^^^^
+Changes since 1.1.0
+^^^^^^^^^^^^^^^^^^^
+
+* Added wrapper which drops user into a pre-configured native database shell.
+
+* Replace manual database binary paths with dynamic PATH lookups.
+
+* Exposed database server settings via the API.
+
+* Added timeouts to server availability checks.
+
+* Allow custom application name to be passed to DB driver.
+
+* Made testing functions available via API.
+
+--------------
 Release: 1.1.0
 --------------
 Date: 20 Sep 2015
