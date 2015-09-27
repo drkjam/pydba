@@ -35,6 +35,14 @@ class PostgresDB(object):
     """
     An API for performing various database administration tasks on a PostgresDB server.
     """
+    _vartype_map = {
+        'bool': lambda x: True if x == 'on' else False,
+        'enum': lambda x: x,
+        'integer': lambda x: int(x),
+        'real': lambda x: float(x),
+        'string': lambda x: x,
+    }
+
     def __init__(self, host='localhost', port=5432, database='postgres', user=None, password=None,
                  sslmode=None, sslcert=None, sslkey=None, bin_path='/usr/local/bin',
                  application_name='pydba (psycopg2)'):
@@ -234,6 +242,10 @@ class PostgresDB(object):
         child.interact()
 
     def settings(self):
-        """Returns a list of existing settings from the server."""
+        """Returns settings from the server."""
         stmt = "select {fields} from pg_settings".format(fields=', '.join(SETTINGS_FIELDS))
-        return list(Settings(**x) for x in self._iter_results(stmt))
+        settings = []
+        for row in self._iter_results(stmt):
+            row['setting'] = self._vartype_map[row['vartype']](row['setting'])
+            settings.append(Settings(**row))
+        return settings

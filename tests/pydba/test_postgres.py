@@ -117,3 +117,7 @@ def test_shell_with_ssl_and_password_prompt():
     assert fake_expect.expect.cmd == 'psql ' \
         '"dbname=postgres user=foo host=localhost port=5432 ' \
         'sslmode=require sslcert=test.pem sslkey=test.key"'
+
+
+def test_settings(pg):
+    assert [x.setting for x in pg.settings() if x.name == 'port'] == [5432]
