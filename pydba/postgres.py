@@ -9,7 +9,7 @@ from collections import namedtuple
 import pexpect
 import psycopg2
 
-from pydba.exc import DatabaseError
+from pydba.exc import DatabaseError, CommandNotFoundError
 
 log = logging.getLogger(__name__)
 
@@ -102,7 +102,11 @@ class PostgresDB(object):
         if cmd in self._bin_paths:
             return self._bin_paths[cmd]
         else:
-            self._bin_paths[cmd] = pexpect.which(cmd)
+            path = pexpect.which(cmd)
+            if path is None:
+                raise CommandNotFoundError('failed to find path of %r' % cmd)
+            self._bin_paths[cmd] = path
+            return path
 
     def _run_cmd(self, cmd, *args):
         cmd_line = [self._path_for(cmd)] + list(args)
