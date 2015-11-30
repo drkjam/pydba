@@ -1,4 +1,15 @@
 --------------
+Release: 1.2.1
+--------------
+Date: 30 Nov 2015
+
+^^^^^^^^^^^^^^^^^^^
+Changes since 1.2.0
+^^^^^^^^^^^^^^^^^^^
+
+* Added support for connection strings and URLs.
+
+--------------
 Release: 1.2.0
 --------------
 Date: 27 Sep 2015
