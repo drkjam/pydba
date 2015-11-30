@@ -121,3 +121,15 @@ def test_shell_with_ssl_and_password_prompt():
 
 def test_settings(pg):
     assert [x.setting for x in pg.settings() if x.name == 'port'] == [5432]
+
+
+def test_connection_dsn():
+    user = getpass.getuser()
+    assert PostgresDB().connection_dsn() == 'dbname=postgres user=%s host=localhost port=5432' % user
+    assert PostgresDB().connection_dsn('foo') == 'dbname=foo user=%s host=localhost port=5432' % user
+
+
+def test_connection_url():
+    user = getpass.getuser()
+    assert PostgresDB().connection_url() == 'postgresql://%s@localhost:5432/postgres' % user
+    assert PostgresDB().connection_url('foo') == 'postgresql://%s@localhost:5432/foo' % user

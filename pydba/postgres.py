@@ -218,17 +218,14 @@ class PostgresDB(object):
         log.info('restoring %s from %s' % (name, filename))
         self._run_cmd('pg_restore', '--verbose', '--dbname=%s' % name, filename)
 
-    def shell(self, expect=pexpect):
-        """
-        Connects the database client shell to the database.
+    def _connect_options(self, name):
+        if name is None:
+            db_name = self._connect_args['database']
+        else:
+            db_name = name
 
-        Parameters
-        ----------
-        expect_module: str
-            the database to which backup will be restored.
-        """
         options = [
-            ('dbname', self._connect_args['database']),
+            ('dbname', db_name),
             ('user', self._connect_args['user']),
             ('host', self._connect_args['host']),
             ('port', self._connect_args['port']),
@@ -241,8 +238,52 @@ class PostgresDB(object):
                 ('sslkey', os.path.expanduser(self._connect_args['sslkey'])),
             ]
 
-        dsn = ' '.join("%s=%s" % (param, value) for param, value in options)
+        return options
 
+    def connection_dsn(self, name=None):
+        """
+        Provides a connection string for database.
+
+        Parameters
+        ----------
+        name: str, optional
+            an override database name for the connection string.
+
+        Returns
+        -------
+        str: the connection string (e.g. 'dbname=db1 user=user1 host=localhost port=5432')
+        """
+        return ' '.join("%s=%s" % (param, value) for param, value in self._connect_options(name))
+
+    def connection_url(self, name=None):
+        """
+        Provides a connection string for database as a sqlalchemy compatible URL.
+
+        NB - this doesn't include special arguments related to SSL connectivity (which are outside the scope
+        of the connection URL format).
+
+        Parameters
+        ----------
+        name: str, optional
+            an override database name for the connection string.
+
+        Returns
+        -------
+        str: the connection URL (e.g. postgresql://user1@localhost:5432/db1)
+            """
+        return 'postgresql://{user}@{host}:{port}/{dbname}'.format(**{k: v for k, v in self._connect_options(name)})
+
+    def shell(self, expect=pexpect):
+        """
+        Connects the database client shell to the database.
+
+        Parameters
+        ----------
+        expect_module: str
+            the database to which backup will be restored.
+        """
+        dsn = self.connection_dsn()
+        log.debug('connection string: %s' % dsn)
         child = expect.spawn('psql "%s"' % dsn)
         if self._connect_args['password'] is not None:
             child.expect('Password: ')
